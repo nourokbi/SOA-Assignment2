@@ -3,6 +3,8 @@ package com.example.demo.service;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Collections;
+import java.util.Comparator;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -202,7 +204,6 @@ public class StudentService {
         return students;
     }
 
-
     // ====================================================================== //
     // the abstract for the main functions that we call from the controller
     // ====================================================================== //
@@ -221,7 +222,6 @@ public class StudentService {
 
         return students;
     }
-
 
     public void deleteStudent(String id) throws Exception {
         Document document = buildOrLoadDocument();
@@ -255,4 +255,62 @@ public class StudentService {
         // =========================================
         saveDocument(document);
     }
+
+    public void sortStudents(String sortProperty, boolean ascending) throws Exception {
+        Document document = buildOrLoadDocument();
+        List<Student> students = getAllStudents(document);
+
+        // Define a comparator based on the specified property
+        Comparator<Student> comparator = getComparatorByProperty(sortProperty);
+
+        // Sort the students
+        if (ascending) {
+            Collections.sort(students, comparator);
+        } else {
+            Collections.sort(students, Collections.reverseOrder(comparator));
+        }
+
+        // Clear existing students in the document
+        clearStudentsInDocument(document);
+
+        // Add sorted students to the document
+        for (Student student : students) {
+            addStudentData(document, student);
+        }
+
+        // Save the sorted document
+        saveDocument(document);
+    }
+
+    private Comparator<Student> getComparatorByProperty(String sortProperty) {
+        switch (sortProperty.toLowerCase()) {
+            case "id":
+                return Comparator.comparing(Student::getId);
+            case "firstname":
+                return Comparator.comparing(Student::getFirstName);
+            case "lastname":
+                return Comparator.comparing(Student::getLastName);
+            case "gender":
+                return Comparator.comparing(Student::getGender);
+            case "gpa":
+                return Comparator.comparing(Student::getGpa);
+            case "level":
+                return Comparator.comparing(Student::getLevel);
+            default:
+                throw new IllegalArgumentException("Invalid sort property: " + sortProperty);
+        }
+    }
+
+    private void clearStudentsInDocument(Document document) {
+        Node universityNode = document.getDocumentElement();
+        NodeList studentNodes = universityNode.getChildNodes();
+
+        for (int i = studentNodes.getLength() - 1; i >= 0; i--) {
+            Node studentNode = studentNodes.item(i);
+            if (studentNode.getNodeType() == Node.ELEMENT_NODE && studentNode.getNodeName().equals("Student")) {
+                universityNode.removeChild(studentNode);
+            }
+        }
+    }
+
 }
