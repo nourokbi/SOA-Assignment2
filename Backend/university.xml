@@ -1,14 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?><University>
 
 
-    <Student ID="3030">
-        <FirstName>ali</FirstName>
-        <LastName>ali</LastName>
-        <Gender>male</Gender>
-        <GPA>3</GPA>
-        <Level>3</Level>
-        <Address>cairo</Address>
-    </Student>
+    
     <Student ID="3090">
         <FirstName>omaromar</FirstName>
         <LastName>ali</LastName>
@@ -41,4 +34,4 @@
         <Level>3</Level>
         <Address>cairo</Address>
     </Student>
-</University>
+<Student ID="3030"><FirstName>ali</FirstName><LastName>ali</LastName><Gender>male</Gender><GPA>3.2</GPA><Level>3</Level><Address>cairo</Address></Student></University>

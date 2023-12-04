@@ -13,13 +13,14 @@ import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
-
+import org.springframework.util.StringUtils;
 import org.springframework.stereotype.Service;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import com.example.demo.api.model.Student;
+
 
 @Service
 public class StudentService {
@@ -68,7 +69,6 @@ public class StudentService {
         Element studentElement = document.createElement("Student");
 
         System.out.println(student);
-
 
         studentElement.setAttribute("ID", student.getId());
 
@@ -249,11 +249,16 @@ public class StudentService {
 
     public void addStudent(Student student) throws Exception {
         Document document = buildOrLoadDocument();
-        addStudentData(document, student);
-        // =========================================
-        // always save the doc after you work with it
-        // =========================================
-        saveDocument(document);
+
+        // Validate student data
+        String validationErrorMessage = validateStudent(student);
+        if (validationErrorMessage != null) {
+            System.out.println("Failed to add student. Validation error: " + validationErrorMessage);
+        } else {
+            addStudentData(document, student);
+            saveDocument(document);
+            System.out.println("Student added successfully.");
+        }
     }
 
     public void sortStudents(String sortProperty, boolean ascending) throws Exception {
@@ -311,6 +316,65 @@ public class StudentService {
                 universityNode.removeChild(studentNode);
             }
         }
+    }
+    private String validateStudent(Student student) {
+        if (StringUtils.isEmpty(student.getId())
+                || StringUtils.isEmpty(student.getFirstName())
+                || StringUtils.isEmpty(student.getLastName())
+                || StringUtils.isEmpty(student.getGender())
+                || StringUtils.isEmpty(student.getGpa())
+                || StringUtils.isEmpty(student.getLevel())
+                || StringUtils.isEmpty(student.getAddress())) {
+            return "All attributes must not be null or empty.";
+        }
+
+        // Check if ID already exists
+        if (studentIdExists(student.getId())) {
+            return "Student ID already exists.";
+        }
+
+        // Validate name and address (characters a-z only)
+        if (!isValidName(student.getFirstName()) || !isValidName(student.getLastName()) || !isValidName(student.getAddress())) {
+            return "Student name and address must contain only characters (a-z).";
+        }
+
+        // Validate GPA (must be from 0 to 4)
+        try {
+            double gpa = Double.parseDouble(student.getGpa());
+            if (gpa < 0 || gpa > 4) {
+                return "GPA must be from 0 to 4.";
+            }
+        } catch (NumberFormatException e) {
+            return "Invalid GPA format.";
+        }
+
+        return null; // No validation errors
+    }
+
+    private boolean isValidName(String name) {
+        return name.matches("^[a-zA-Z]+$");
+    }
+
+    private boolean studentIdExists(String studentId) {
+        Document document;
+        try {
+            document = buildOrLoadDocument();
+            NodeList nodeList = document.getElementsByTagName("Student");
+
+            for (int i = 0; i < nodeList.getLength(); i++) {
+                Node studentNode = nodeList.item(i);
+                if (studentNode.getNodeType() == Node.ELEMENT_NODE) {
+                    Element studentElement = (Element) studentNode;
+                    String id = studentElement.getAttribute("ID");
+                    if (id.equals(studentId)) {
+                        return true; // ID already exists
+                    }
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return false;
     }
 
 }
