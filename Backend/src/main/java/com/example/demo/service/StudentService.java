@@ -204,13 +204,73 @@ public class StudentService {
         return students;
     }
 
+    public static List<Student> getSpecificStudents(Document document, String property, String searchWord) {
+        NodeList nodeList = document.getElementsByTagName("Student");
+        List<Student> students = new ArrayList<>();
+
+        for (int i = 0; i < nodeList.getLength(); i++) {
+            Node studentNode = nodeList.item(i);
+
+            if (studentNode.getNodeType() == Node.ELEMENT_NODE) {
+                Element studentElement = (Element) studentNode;
+
+                String firstName = studentElement.getElementsByTagName("FirstName").item(0).getTextContent();
+                String gpa = studentElement.getElementsByTagName("GPA").item(0).getTextContent();
+                String id = studentElement.getAttribute("ID");
+                String lastName = studentElement.getElementsByTagName("LastName").item(0).getTextContent();
+                String level = studentElement.getElementsByTagName("Level").item(0).getTextContent();
+                String gender = studentElement.getElementsByTagName("Gender").item(0).getTextContent();
+                String address = studentElement.getElementsByTagName("Address").item(0).getTextContent();
+
+                // Check the specified property and perform the search
+                if (("id".equals(property) && id.equals(searchWord))
+                        || ("firstName".equals(property) && firstName.equals(searchWord))
+                        || ("lastName".equals(property) && lastName.equals(searchWord))
+                        || ("level".equals(property) && level.equals(searchWord))
+                        || ("gpa".equals(property) && gpa.equals(searchWord))
+                        || ("gender".equals(property) && gender.equals(searchWord))
+                        || ("address".equals(property) && address.equals(searchWord))) {
+                    students.add(new Student(id, firstName, lastName, level, gpa, gender, address));
+                }
+            }
+        }
+        return students;
+    }
+
+    public void sortStudents(String sortProperty, boolean ascending) throws Exception {
+        Document document = buildOrLoadDocument();
+        List<Student> students = getAllStudents(document);
+
+        // Define a comparator based on the specified property
+        Comparator<Student> comparator = getComparatorByProperty(sortProperty);
+
+        // Sort the students
+        if (ascending) {
+            students.sort(comparator);
+        } else {
+            students.sort(Collections.reverseOrder(comparator));
+        }
+
+        // Clear existing students in the document
+        clearStudentsInDocument(document);
+
+        // Add sorted students to the document
+        for (Student student : students) {
+            addStudentData(document, student);
+        }
+
+        // Save the sorted document
+        saveDocument(document);
+    }
+
+
     // ====================================================================== //
     // the abstract for the main functions that we call from the controller
     // ====================================================================== //
 
-    public List<Student> getMatchedStudents(String search) throws Exception {
+    public List<Student> getMatchedStudents(String property , String search) throws Exception {
         Document document = buildOrLoadDocument();
-        List<Student> students = getSpecificStudents(document, search);
+        List<Student> students = getSpecificStudents(document,property ,  search);
         saveDocument(document);
         return students;
     }
@@ -261,31 +321,7 @@ public class StudentService {
         }
     }
 
-    public void sortStudents(String sortProperty, boolean ascending) throws Exception {
-        Document document = buildOrLoadDocument();
-        List<Student> students = getAllStudents(document);
 
-        // Define a comparator based on the specified property
-        Comparator<Student> comparator = getComparatorByProperty(sortProperty);
-
-        // Sort the students
-        if (ascending) {
-            Collections.sort(students, comparator);
-        } else {
-            Collections.sort(students, Collections.reverseOrder(comparator));
-        }
-
-        // Clear existing students in the document
-        clearStudentsInDocument(document);
-
-        // Add sorted students to the document
-        for (Student student : students) {
-            addStudentData(document, student);
-        }
-
-        // Save the sorted document
-        saveDocument(document);
-    }
 
     private Comparator<Student> getComparatorByProperty(String sortProperty) {
         switch (sortProperty.toLowerCase()) {

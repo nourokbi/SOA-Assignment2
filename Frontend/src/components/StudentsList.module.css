@@ -6,7 +6,16 @@
 .list {
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  gap: 0rem;
+}
+
+.item {
+  border: 1px solid #ccc;
+  color: inherit;
+  margin: 1rem 0;
+  padding: 1.5rem;
+  border-radius: 8px;
+  transition: box-shadow 0.3s ease;
 }
 
 .item a {
@@ -21,16 +30,24 @@
 .item a:hover {
   transform: scale(1.02);
   background-color: var(--color-gray-700);
-}
-
-.item img {
-  width: 33%;
-  object-fit: cover;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
 .content {
   padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
 }
 .item h2 {
   margin: 0 0 1rem 0;
+  padding: 0;
+}
+
+.id {
+  padding: 0;
+  margin-top: 2px;
+  /* color: rgb(37, 239, 18); */
+  color: rgb(255, 177, 21);
+  font-size: 1.2em;
 }

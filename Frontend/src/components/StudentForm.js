@@ -9,7 +9,7 @@ import {
 
 import classes from "./StudentForm.module.css";
 
-function StudentForm({ method, student }) {
+function StudentForm({ method, student, editStudent }) {
   const navigate = useNavigate();
   const navigation = useNavigation();
   const isSubmitting = navigation.state === "submitting";
@@ -52,16 +52,21 @@ function StudentForm({ method, student }) {
             defaultValue={student ? student.lastName : ""}
           />
         </p>
-        <p>
-          <label htmlFor="id">ID</label>
-          <input
-            id="id"
-            type="text"
-            name="id"
-            required
-            defaultValue={student ? student.id : ""}
-          />
-        </p>
+        {!editStudent && (
+          <p>
+            <label htmlFor="id">ID</label>
+            <input
+              id="id"
+              type="text"
+              name="id"
+              required
+              defaultValue={student ? student.id : ""}
+            />
+          </p>
+        )}
+        {editStudent && (
+          <input type="hidden" name="id" value={student ? student.id : ""} />
+        )}
 
         <p>
           <label htmlFor="level">Level</label>
