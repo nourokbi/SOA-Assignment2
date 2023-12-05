@@ -5,7 +5,7 @@ import { useRouteLoaderData } from "react-router-dom";
 const EditStudentPage = () => {
   const data = useRouteLoaderData("ourParent");
 
-  return <StudentForm student={data} method="PATCH" />;
+  return <StudentForm student={data} method="PATCH" editStudent={true} />;
 };
 
 export default EditStudentPage;

@@ -7,6 +7,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 
 @RestController
 @CrossOrigin(origins = "http://localhost:3000")
@@ -21,15 +23,26 @@ public class StudentController {
 
 
     // to get specific students
-    @GetMapping("/search")
-    public String getStudents(@RequestParam String search) throws Exception {
-        List<Student> students = studentService.getMatchedStudents(search);
+    @PostMapping("/search")
+    public String getStudents(@RequestBody Map<String, String> searchRequest) throws Exception {
+
+        String word = searchRequest.get("word");
+        String property = searchRequest.get("property");
+
+        List<Student> students = studentService.getMatchedStudents(property, word);
         ObjectMapper objectMapper = new ObjectMapper();
         String jsonStudents = objectMapper.writeValueAsString(students);
         System.out.println(jsonStudents);
         return jsonStudents;
 
+    }
 
+
+    @PostMapping("/sort")
+    public void sortStudents(@RequestBody Map<String, String> searchRequest) throws Exception {
+        String mode = searchRequest.get("mode");
+        String property = searchRequest.get("property");
+        studentService.sortStudents(property , mode.equals("ascending"));
     }
 
 
